@@ -1,70 +1,73 @@
-// export interface IContainerFocusTracker {
-//   onBlur?: () => void;
-//   onFocus?: () => void;
-//   // onKeyedBlur?: () => void;
-//   // onKeyedFocus?: () => void;
-//   children: React.ReactNode;
-//   shouldTrack: boolean;
-// }
+import React, { createRef } from "react";
+import { debounce } from "lodash";
 
-// export class ContainerFocusTracker extends React.Component<
-//   IContainerFocusTracker
-// > {
-//   private accordionHasFocus: boolean = null;
-//   private lastKey: number = null;
+export interface IContainerFocusTrackerProps {
+  onBlur?: () => void;
+  onFocus?: () => void;
+  // onKeyedBlur?: () => void;
+  // onKeyedFocus?: () => void;
+  children: React.ReactNode;
+  shouldTrack: boolean;
+}
 
-//   private node = createRef<HTMLDivElement>();
+export class ContainerFocusTracker extends React.Component<
+  IContainerFocusTrackerProps
+> {
+  private accordionHasFocus: boolean = null;
+  private lastKey: number = null;
 
-//   private determineContainerHasFocus = debounce(() => {
-//     const hasFocus = this.node.current.contains(document.activeElement);
-//     if (hasFocus && !this.accordionHasFocus) {
-//       if (this.props.onFocus) {
-//         this.props.onFocus(this.lastKey);
-//       }
-//     }
+  private node = createRef<HTMLDivElement>();
 
-//     if (
-//       !hasFocus &&
-//       this.accordionHasFocus &&
-//       this.accordionHasFocus !== null
-//     ) {
-//       if (this.props.onBlur) {
-//         this.props.onBlur(this.lastKey);
-//       }
-//     }
+  private determineContainerHasFocus = debounce(() => {
+    const hasFocus = this.node.current.contains(document.activeElement);
+    if (hasFocus && !this.accordionHasFocus) {
+      if (this.props.onFocus) {
+        this.props.onFocus();
+      }
+    }
 
-//     this.accordionHasFocus = hasFocus;
-//   }, 200);
+    if (
+      !hasFocus &&
+      this.accordionHasFocus &&
+      this.accordionHasFocus !== null
+    ) {
+      if (this.props.onBlur) {
+        this.props.onBlur();
+      }
+    }
 
-//   public componentDidMount() {
-//     if (this.props.shouldTrack) {
-//       window.addEventListener('keydown', this.handleKeyDown);
-//       window.addEventListener('focusin', this.handleFocusIn);
-//       window.addEventListener('focusout', this.handleFocusOut);
-//     }
-//   }
+    this.accordionHasFocus = hasFocus;
+  }, 200);
 
-//   public componentWillUnmount() {
-//     if (this.props.shouldTrack) {
-//       window.removeEventListener('keydown', this.handleKeyDown);
-//       window.removeEventListener('focusin', this.handleFocusIn);
-//       window.removeEventListener('focusout', this.handleFocusOut);
-//     }
-//   }
+  public componentDidMount() {
+    if (this.props.shouldTrack) {
+      window.addEventListener("keydown", this.handleKeyDown);
+      window.addEventListener("focusin", this.handleFocusIn);
+      window.addEventListener("focusout", this.handleFocusOut);
+    }
+  }
 
-//   public handleKeyDown = (ev: KeyboardEvent) => {
-//     this.lastKey = ev.keyCode;
-//   };
+  public componentWillUnmount() {
+    if (this.props.shouldTrack) {
+      window.removeEventListener("keydown", this.handleKeyDown);
+      window.removeEventListener("focusin", this.handleFocusIn);
+      window.removeEventListener("focusout", this.handleFocusOut);
+    }
+  }
 
-//   public handleFocusIn = (ev: FocusEvent) => {
-//     this.determineContainerHasFocus();
-//   };
+  public handleKeyDown = (ev: KeyboardEvent) => {
+    this.lastKey = ev.keyCode;
+  };
 
-//   public handleFocusOut = (ev: FocusEvent) => {
-//     this.determineContainerHasFocus();
-//   };
+  public handleFocusIn = (ev: FocusEvent) => {
+    this.determineContainerHasFocus();
+  };
 
-//   public render() {
-//     return <div ref={this.node}>{this.props.children}</div>;
-//   }
-// }
+  public handleFocusOut = (ev: FocusEvent) => {
+    this.determineContainerHasFocus();
+  };
+
+  public render() {
+    return <div ref={this.node}>{this.props.children}</div>;
+  }
+}
